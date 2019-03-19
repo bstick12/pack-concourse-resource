@@ -1,0 +1,67 @@
+#!/bin/bash
+
+set -e -ux
+
+exec 3>&1
+exec 1>&2
+
+source $(dirname $0)/common.sh
+
+source=$1
+
+if [ -z "$source" ]; then
+  echo "usage: $0 <path/to/source>"
+  exit 1
+fi
+
+PATH=/usr/local/bin:$PATH
+
+payload=$(mktemp /tmp/resource-in.XXXXXX)
+
+cat > $payload <&0
+
+cd $source
+
+insecure_registries=$(jq -r '.source.insecure_registries // [] | join(" ")' < $payload)
+registry_mirror=$(jq -r '.source.registry_mirror // ""' < $payload)
+
+username=$(jq -r '.source.username // ""' < $payload)
+password=$(jq -r '.source.password // ""' < $payload)
+repository=$(jq -r '.source.repository // ""' < $payload)
+ca_certs=$(jq -r '.source.ca_certs // []' < $payload)
+client_certs=$(jq -r '.source.client_certs // []' < $payload)
+max_concurrent_downloads=$(jq -r '.source.max_concurrent_downloads // 3' < $payload)
+max_concurrent_uploads=$(jq -r '.source.max_concurrent_uploads // 3' < $payload)
+
+builder=$(jq -r '.source.builder // ""' < $payload)
+stack=$(jq -r '.source.stack // ""' < $payload)
+env_file=$(jq -r '.source.env_file // ""' < $payload)
+
+if private_registry "${repository}" ; then
+  registry="$(extract_registry "${repository}")"
+else
+  registry=
+fi
+
+certs_to_file "$ca_certs"
+set_client_certs "$client_certs"
+start_docker \
+	"$insecure_registries" \
+	"$registry_mirror"
+log_in "$username" "$password" "$registry"
+
+if [ ! -z $builder ]; then
+  pack set-default-builder $builder
+fi
+
+if [ ! -z $stack ]; then
+  pack set-default-stack $stack
+fi
+
+pack_args=""
+
+if [ ! -z $env_file ]; then
+  pack_args="${pack_args} --env-file $env_file"
+fi
+
+pack build ${repository} ${pack_args} --publish
