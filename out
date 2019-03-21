@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e -ux
+set -e -u
 
 exec 3>&1
 exec 1>&2
@@ -33,22 +33,26 @@ client_certs=$(jq -r '.source.client_certs // []' < $payload)
 max_concurrent_downloads=$(jq -r '.source.max_concurrent_downloads // 3' < $payload)
 max_concurrent_uploads=$(jq -r '.source.max_concurrent_uploads // 3' < $payload)
 
-builder=$(jq -r '.source.builder // ""' < $payload)
-stack=$(jq -r '.source.stack // ""' < $payload)
-env_file=$(jq -r '.source.env_file // ""' < $payload)
 
-if private_registry "${repository}" ; then
-  registry="$(extract_registry "${repository}")"
+if private_registry "$repository" ; then
+  registry="$(extract_registry "$repository")"
 else
   registry=
 fi
 
 certs_to_file "$ca_certs"
 set_client_certs "$client_certs"
+sanitize_cgroups
 start_docker \
 	"$insecure_registries" \
-	"$registry_mirror"
+  "$registry_mirror"
 log_in "$username" "$password" "$registry"
+
+
+build=$(jq -r '.params.build // "./"' < $payload)
+stack=$(jq -r '.params.stack // ""' < $payload)
+env_file=$(jq -r '.params.env_file // ""' < $payload)
+builder=$(jq -r '.params.builder // ""' < $payload)
 
 if [ ! -z $builder ]; then
   pack set-default-builder $builder
@@ -61,7 +65,7 @@ fi
 pack_args=""
 
 if [ ! -z $env_file ]; then
-  pack_args="${pack_args} --env-file $env_file"
+  pack_args="$pack_args --env-file $build/$env_file"
 fi
 
-pack build ${repository} ${pack_args} --publish
+pack build $repository $pack_args --path $build --publish
