@@ -1,0 +1,31 @@
+---
+resources:
+- name: git-navcon-sample
+  type: git
+  source:
+    uri: https://github.com/bstick12/navcon-sample.git
+- name: pack-goflake
+  type: pack-image-resource
+  source:
+    repository: bstick12/navcon-pack
+    email: ((docker-hub-email))
+    username: ((docker-hub-username))
+    password: ((docker-hub-password))
+
+resource_types:
+- name: pack-image-resource
+  type: docker-image
+  privileged: true
+  source:
+    repository: bstick12/pack-concourse-resource
+    version: latest
+
+jobs:
+- name: build-goflake-image
+  plan:
+  - get: git-navcon-sample
+    trigger: true
+  - put: pack-goflake
+    params:
+      build: git-navcon-sample
+      builder: bstick12/samples-builder
