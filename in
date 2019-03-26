@@ -1,4 +1,4 @@
 #!/bin/bash
 
-jq -n "{}" 
+jq -n "{}"
 

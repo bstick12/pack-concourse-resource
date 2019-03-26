@@ -33,7 +33,6 @@ client_certs=$(jq -r '.source.client_certs // []' < $payload)
 max_concurrent_downloads=$(jq -r '.source.max_concurrent_downloads // 3' < $payload)
 max_concurrent_uploads=$(jq -r '.source.max_concurrent_uploads // 3' < $payload)
 
-
 if private_registry "$repository" ; then
   registry="$(extract_registry "$repository")"
 else
