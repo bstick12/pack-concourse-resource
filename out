@@ -68,4 +68,22 @@ if [ ! -z $env_file ]; then
   pack_args="$pack_args --env-file $build/$env_file"
 fi
 
-pack build $repository $pack_args --path $build --publish
+pack build $repository $pack_args --path $build
+
+docker push $repository
+
+inspect_output=$(docker inspect $repository)
+
+jq -n "{
+  version: {
+     ref: \"$(echo $inspect_output | jq -r '.[].RepoDigests[0]')\"
+  },
+  metadata: [
+    {
+      name: \"$repository\",
+      id: \"$(echo $inspect_output | jq -r '.[].Id')\",
+      git: \"$(git -C $build rev-parse HEAD)\"
+    }
+  ]
+}" >&3
+
