@@ -6,6 +6,7 @@ Uses Docker in Docker so must be run a privileged.
 
 It borrows heavily from the [docker-image-resource](https://github.com/concourse/docker-image-resource)
 
+It utilizes the `in` and `check` behaviours from the [registry-image-resource](https://github.com/concourse/registry-image-resource)
 
 Currently will only work with buildpacks that are build using `pack` > v0.0.9
 
@@ -16,9 +17,13 @@ Currently will only work with buildpacks that are build using `pack` > v0.0.9
 * `password`: Required. The password to use when authenticating
 
 ### Behaviour
-`check`: Currently not supported.
+`check`: Discover new digests
 
-`in`: Currently not supported
+See [registry-image-resource/check](https://github.com/concourse/registry-image-resource#check-discover-new-digests)
+
+`in`: Fetch the image's rootfs and metadata
+
+See [registry-image-resource/in](https://github.com/concourse/registry-image-resource#in-fetch-the-images-rootfs-and-metadata)
 
 `out`: Build an OCI image using the `pack` CLI and push to a repository
 

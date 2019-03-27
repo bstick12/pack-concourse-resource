@@ -1,0 +1,3 @@
+[submodule "registry-image-resource"]
+	path = registry-image-resource
+	url = git@github.com:concourse/registry-image-resource.git

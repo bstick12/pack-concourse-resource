@@ -75,7 +75,7 @@ inspect_output=$(docker inspect $repository)
 
 jq -n "{
   version: {
-     ref: \"$(echo $inspect_output | jq -r '.[].RepoDigests[0]')\"
+     digest: \"$(echo $inspect_output | jq '.[].RepoDigests[0]' | jq -r 'split("@")[1]')\"
   },
   metadata: [
     {

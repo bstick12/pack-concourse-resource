@@ -8,7 +8,6 @@ resources:
   type: pack-image-resource
   source:
     repository: ((repository))
-    email: ((docker-hub-email))
     username: ((docker-hub-username))
     password: ((docker-hub-password))
 
