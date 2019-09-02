@@ -13,6 +13,7 @@ Currently will only work with buildpacks that are build using `pack` > v0.0.9
 ## Source Configuration
 
 * `repository`: Required. The name of the repository that you want to build e.g `bstick12/built-with-pack`
+* `tag`: Optional. The tag value for the image. Defaults to `latest`
 * `username`: Required. The username to authenticate with when pushing
 * `password`: Required. The password to use when authenticating
 

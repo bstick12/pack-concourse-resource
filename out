@@ -28,6 +28,7 @@ registry_mirror=$(jq -r '.source.registry_mirror // ""' < $payload)
 username=$(jq -r '.source.username // ""' < $payload)
 password=$(jq -r '.source.password // ""' < $payload)
 repository=$(jq -r '.source.repository // ""' < $payload)
+tag=$(jq -r '.source.tag // "latest"' < $payload)
 ca_certs=$(jq -r '.source.ca_certs // []' < $payload)
 client_certs=$(jq -r '.source.client_certs // []' < $payload)
 max_concurrent_downloads=$(jq -r '.source.max_concurrent_downloads // 3' < $payload)
@@ -67,11 +68,11 @@ if [ ! -z $env_file ]; then
   pack_args="$pack_args --env-file $build/$env_file"
 fi
 
-pack build $repository $pack_args --path $build
+pack build $repository:$tag $pack_args --path $build
 
-docker push $repository
+docker push $repository:$tag
 
-inspect_output=$(docker inspect $repository)
+inspect_output=$(docker inspect $repository:$tag)
 
 jq -n "{
   version: {
@@ -79,7 +80,7 @@ jq -n "{
   },
   metadata: [
     {
-      name: \"$repository\",
+      name: \"$repository:$tag\",
       id: \"$(echo $inspect_output | jq -r '.[].Id')\",
       git: \"$(git -C $build rev-parse HEAD)\"
     }
