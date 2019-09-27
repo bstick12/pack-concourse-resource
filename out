@@ -28,7 +28,26 @@ registry_mirror=$(jq -r '.source.registry_mirror // ""' < $payload)
 username=$(jq -r '.source.username // ""' < $payload)
 password=$(jq -r '.source.password // ""' < $payload)
 repository=$(jq -r '.source.repository // ""' < $payload)
-tag=$(jq -r '.source.tag // "latest"' < $payload)
+
+tag_source=$(jq -r '.source.tag // "latest"' < $payload)
+tag_params=$(jq -r '.params.tag_file // ""' < $payload)
+# [docker-image-resource] for backwards compatibility, check `tag` if `tag_file` is empty
+if [ -z "$tag_params" ]; then
+  tag_params=$(jq -r '.params.tag // ""' < $payload)
+fi
+tag_prefix=$(jq -r '.params.tag_prefix // ""' < $payload)
+
+tag_name=""
+if [ -n "$tag_params" ]; then
+  if [ ! -f "$tag_params" ]; then
+    echo "tag file '$tag_params' does not exist"
+    exit 1
+  fi
+  tag_name="${tag_prefix}$(cat $tag_params)"
+else
+  tag_name="$tag_source"
+fi
+
 ca_certs=$(jq -r '.source.ca_certs // []' < $payload)
 client_certs=$(jq -r '.source.client_certs // []' < $payload)
 max_concurrent_downloads=$(jq -r '.source.max_concurrent_downloads // 3' < $payload)
@@ -68,11 +87,11 @@ if [ ! -z $env_file ]; then
   pack_args="$pack_args --env-file $build/$env_file"
 fi
 
-pack build $repository:$tag $pack_args --path $build
+pack build $repository:$tag_name $pack_args --path $build
 
-docker push $repository:$tag
+docker push $repository:$tag_name
 
-inspect_output=$(docker inspect $repository:$tag)
+inspect_output=$(docker inspect $repository:$tag_name)
 
 jq -n "{
   version: {
@@ -80,7 +99,7 @@ jq -n "{
   },
   metadata: [
     {
-      name: \"$repository:$tag\",
+      name: \"$repository:$tag_name\",
       id: \"$(echo $inspect_output | jq -r '.[].Id')\",
       git: \"$(git -C $build rev-parse HEAD)\"
     }
