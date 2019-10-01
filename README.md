@@ -29,8 +29,14 @@ See [registry-image-resource/in](https://github.com/concourse/registry-image-res
 `out`: Build an OCI image using the `pack` CLI and push to a repository
 
 #### Parameters
+
 * `build`: Required. The source code to build in to the OCI image.
-* `builder`: Optional. The builder to use to build the OCI image.
+* `builder`: *Optional.* The builder to use to build the OCI image.
+* `tag`: *Optional.* Name of tag. Defaults to `latest`. Overridden by `tag_file`.
+* `tag_file`: *Optional.* The value should be a path to a file containing the name of the tag.
+* `tag_prefix`: *Optional.* If specified, the tag read from the file will be
+  prepended with this string. This is useful for adding `v` in front of version
+  numbers.
 
 ### Example
 
