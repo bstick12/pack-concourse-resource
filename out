@@ -84,7 +84,7 @@ fi
 pack_args=""
 
 if [ ! -z $env_file ]; then
-  pack_args="$pack_args --env-file $build/$env_file"
+  pack_args="$pack_args --env-file $env_file"
 fi
 
 pack build $repository:$tag_name $pack_args --path $build
