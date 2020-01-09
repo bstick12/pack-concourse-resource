@@ -1,4 +1,4 @@
-VERSION=0.5.0
+VERSION=0.6.0
 
 .PHONY: all docker dind docker-push dind-push pack-concourse-resource pack-concourse-resource-push
 
