@@ -1,5 +1,9 @@
 # Pack CLI Concourse Resource
 
+You should probably look at using the [`lifecycle-build` task](https://github.com/bstick12/lifecycle-build-task) instead of this resource.
+
+---
+
 A proof of concept concourse resource that builds OCI images using the [pack-cli](https://github.com/buildpack/pack)
 
 Uses Docker in Docker so must be run a privileged.
