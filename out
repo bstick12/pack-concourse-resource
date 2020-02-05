@@ -101,7 +101,6 @@ jq -n "{
     {
       name: \"$repository:$tag_name\",
       id: \"$(echo $inspect_output | jq -r '.[].Id')\",
-      git: \"$(git -C $build rev-parse HEAD)\"
     }
   ]
 }" >&3
